@@ -30,7 +30,6 @@ for k in clusters:
         count+=1
 if count!=q:
     score-=penalty
-    print("grra")
 
 #apply penalty for multiple similar stock
 for j in substrings:
@@ -40,18 +39,15 @@ for j in substrings:
             count+=1
     if count!=1:
         score-=penalty
-        print("grrb")
 
 # #apply penalty for x_{ij}>y_j
 # for i in range(n):
 #     for j in range(n):
 #         if bitstring[n*i+j]>bitstring[n**2+j]:
 #             score-=penalty
-#             print("grrc")
 
 
 for j in range(n):
     if(bitstring[n*j+j]!=bitstring[n**2+j]):
         score-=penalty
-        print("grrd")
 print(score)
