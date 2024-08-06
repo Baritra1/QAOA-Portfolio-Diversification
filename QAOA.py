@@ -31,15 +31,15 @@ def QAOA(n,q,p,betas,gammas):
                     qubit=n*i+j
                     circuit.rz(phi=gammas[P]*correlation_matrix[i][j],qubit=qubit)
 
-        penalty=10*maxEdgeWeight
+        penalty=8*maxEdgeWeight
         #generate penalty unitary matrices 
 
         #choosing multiple most similar stocks
-        entries= [1]*(2**n)
+        entries= [0]*(2**n)
         cur=0
         while cur<2**n:
             if(cur.bit_count()!=1):
-                entries[cur]=0
+                entries[cur]=-1
             cur+=1
         for i in range(len(entries)):
             entries[i]=math.e**(entries[i]*gammas[P]*penalty*1j)
@@ -48,11 +48,11 @@ def QAOA(n,q,p,betas,gammas):
             circuit.append(DiagonalGate(entries),excessSimilarStock)
 
         #choosing the wrong amount of clusters 
-        entries= [1]*(2**n)
+        entries= [0]*(2**n)
         cur=0
         while cur<2**n:
             if(cur.bit_count()!=q):
-                entries[cur]=0
+                entries[cur]=-1
             cur+=1
         for i in range(len(entries)):
             entries[i]=math.e**(entries[i]*gammas[P]*penalty*1j)
@@ -60,7 +60,7 @@ def QAOA(n,q,p,betas,gammas):
         circuit.append(DiagonalGate(entries),wrongCluster)
 
         #x_{jj}=y_j
-        entries=[1,0,0,1]
+        entries=[0,-1,-1,0]
         for i in range(len(entries)):
             entries[i]=math.e**(entries[i]*gammas[P]*penalty*1j)
         for j in range(n):
@@ -68,7 +68,7 @@ def QAOA(n,q,p,betas,gammas):
             circuit.append(DiagonalGate(entries),similarCluster)
 
         #x_{ij}<=y_j
-        entries=[1,1,0,1]
+        entries=[0,0,-1,0]
         for i in range(len(entries)):
             entries[i]=math.e**(entries[i]*gammas[P]*penalty*1j)
         for i in range(n):
@@ -95,7 +95,7 @@ def computeExpectationValue(counts,q,n):
                     score+=correlation_matrix[i][j]
 
         #penalty for violating constraints
-        penalty=10*maxEdgeWeight
+        penalty=8*maxEdgeWeight
         substrings=[bitstring[i:i + n] for i in range(0, len(bitstring)-n, n)]
         clusters=bitstring[n**2:n**2+n]
 
@@ -184,7 +184,7 @@ nIterations = 10000
 #Typically need quite a few samples (measurements of quantum circuit) per iteration to 
 nSamples = 10000
 #initial trust
-rhobeg=100000.0
+rhobeg=10000000.0
 #choose parameters near 0
 params=[]
 maxEdgeWeight=0
@@ -194,7 +194,6 @@ for i in range(len(correlation_matrix)):
 for i in range(p*2):
     params.append(0.01*np.random.rand())
 answer =optimize(nIterations=nIterations,params=params,rhobeg=rhobeg)
-for i in range(5):
-    print(i,answer[i])
-for i in range(10):
+
+for i in range(1,20):
     print(-i,answer[-i])
